@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from kansasii_paths import COMPLEX, SCREENING_MAP_RESULTS
+from kansasii_paths import COMPLEX, OUT_RIDOM, SCREENING_MAP_RESULTS
 
 # one MST / distance matrix per subset; the minor species are exported together
 SUBSETS: dict[str, list[str] | None] = {
@@ -17,6 +17,14 @@ SUBSETS: dict[str, list[str] | None] = {
     "minor": ["attenuatum", "ostraviense", "innocens", "gastri"],
 }
 REFERENCE_PREFIX = "GCF_"  # the 7 public GTDB references are named by accession in Ridom
+RIDOM_TARBALL = OUT_RIDOM / "ridom_assemblies.tar.gz"  # input of SeqSphere+ (01_export_ridom.py)
+RIDOM_ZIP = OUT_RIDOM / "ridom_assemblies.zip"
+# public GTDB representatives (accession, species) sent to Ridom as references; the first is the ATCC 12478 type strain
+REFERENCES = {
+    "GCF_000157895.3": "kansasii", "GCF_002086675.1": "persicum", "GCF_900566075.1": "pseudokansasii",
+    "GCF_900566085.1": "attenuatum", "GCF_900566055.1": "innocens", "GCF_002705925.1": "ostraviense",
+    "GCF_002102175.1": "gastri",
+}
 
 
 def ridom_id(pnr: str, label: str) -> str:
@@ -27,7 +35,7 @@ def ridom_id(pnr: str, label: str) -> str:
 
 
 def load_cohort(results: Path = SCREENING_MAP_RESULTS) -> pd.DataFrame:
-    """Complex isolates (not contaminated) with columns sample, ridom_id, species, keep (not `excluded`).
+    """Complex isolates (not contaminated) with columns sample, ridom_id, label, species, keep (not `excluded`).
 
     `keep` rows are the cohort that was sent to Ridom (174); the rest is the pool (175, adds M055, excluded by coverage only).
     """
@@ -36,5 +44,6 @@ def load_cohort(results: Path = SCREENING_MAP_RESULTS) -> pd.DataFrame:
     m = m[m.species.isin(COMPLEX) & (m.contamination_flag != "contaminated")]
     return pd.DataFrame({"sample": m.PROBENNUMMER,
                          "ridom_id": [ridom_id(p, lab) for p, lab in zip(m.PROBENNUMMER, m.LABEL)],
+                         "label": m.LABEL,
                          "species": m.species,
                          "keep": m.excluded.str.lower() != "true"}).reset_index(drop=True)

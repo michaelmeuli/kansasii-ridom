@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Check the Ridom exports in data/imm against the list of exports still needed (scripts/00).
+# Check the Ridom exports in data/imm against the list of exports still needed (scripts/00 only; the archive for Ridom is submit_export.sbatch).
 #   sbatch submit_all.sbatch
 # Inputs : data/imm/ridom-*, data/imm/screening_map_results.csv
 # Outputs: output/kansasii-ridom/results/export_status.tsv
@@ -16,10 +16,8 @@ OUTPUT=$OUT_RIDOM/results
 source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate env_ridom
 cd "$REPO/scripts"
-for s in [0-9][0-9]_*.py; do
-  echo "=== $s ($(date +%T))"
-  python "$s"
-done
+echo "=== 00_check_exports.py ($(date +%T))"
+python 00_check_exports.py
 echo "done $(date +%T)"
 
 # provenance (see kansasii-docs/docs/PROVENANCE.md)
