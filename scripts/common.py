@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from kansasii_paths import COMPLEX, OUT_RIDOM, SCREENING_MAP_RESULTS
+from kansasii_paths import COHORT_SPECIES, OUT_RIDOM, SCREENING_MAP_RESULTS
 
 # one MST / distance matrix per subset; the minor species are exported together
 SUBSETS: dict[str, list[str] | None] = {
@@ -41,7 +41,7 @@ def load_cohort(results: Path = SCREENING_MAP_RESULTS) -> pd.DataFrame:
     """
     m = pd.read_csv(results, dtype=str, keep_default_na=False,
                     usecols=["PROBENNUMMER", "LABEL", "species", "contamination_flag", "excluded"])
-    m = m[m.species.isin(COMPLEX) & (m.contamination_flag != "contaminated")]
+    m = m[m.species.isin(COHORT_SPECIES) & (m.contamination_flag != "contaminated")]
     return pd.DataFrame({"sample": m.PROBENNUMMER,
                          "ridom_id": [ridom_id(p, lab) for p, lab in zip(m.PROBENNUMMER, m.LABEL)],
                          "label": m.LABEL,
