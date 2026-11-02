@@ -9,7 +9,7 @@ import pytest
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-from common import meg_label, read_meg, species_of  # noqa: E402
+from common import DISTANCE_SUBSETS, SUBSETS, meg_label, read_meg, species_of  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location("distance_matrices", SCRIPTS / "02_distance_matrices.py")
 assert _spec is not None and _spec.loader is not None
@@ -81,3 +81,10 @@ def test_check_file_meg(tmp_path: Path) -> None:
     assert check.check_file(p, "labels", {"M001", "M002", "M003"}, True)[0] == "OK"
     assert check.check_file(p, "labels", {"M001", "M002", "M003", "M004"}, True)[0] == "INCOMPLETE"
     assert check.check_file(_write(tmp_path, "garbage"), "labels", set(), False)[0] == "INCOMPLETE"
+
+
+def test_distance_subsets() -> None:
+    assert set(SUBSETS) < set(DISTANCE_SUBSETS)  # MST/tree subsets unchanged
+    minor = SUBSETS["minor"]
+    assert minor is not None and {m for m in minor} == {n for n in DISTANCE_SUBSETS if n in minor}
+    assert all(DISTANCE_SUBSETS[m] == [m] for m in minor)

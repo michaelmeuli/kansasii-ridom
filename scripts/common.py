@@ -17,6 +17,10 @@ SUBSETS: dict[str, list[str] | None] = {
     "persicum": ["persicum"],
     "minor": ["attenuatum", "ostraviense", "innocens", "gastri"],
 }
+# distance matrices are sliced in code, so the minor species also get one matrix each (MST/tree exports keep SUBSETS)
+DISTANCE_SUBSETS: dict[str, list[str] | None] = {
+    **SUBSETS, "attenuatum": ["attenuatum"], "ostraviense": ["ostraviense"], "innocens": ["innocens"], "gastri": ["gastri"],
+}
 REFERENCE_PREFIX = "GCF_"  # the 7 public GTDB references are named by accession in Ridom
 RIDOM_TARBALL = OUT_RIDOM / "ridom_assemblies.tar.gz"  # input of SeqSphere+ (01_export_ridom.py)
 RIDOM_ZIP = OUT_RIDOM / "ridom_assemblies.zip"

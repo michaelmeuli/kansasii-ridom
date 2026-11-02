@@ -5,7 +5,7 @@ Ridom when it computed the matrix (pairwise ignore, see the export log of RIDOM.
 a pair does not depend on the other isolates, so a subset matrix is the submatrix of the complex one.
 
 Writes to output/kansasii-ridom/results/: distance_<subset>.tsv (square, Sample ID in the first column, subsets of
-SUBSETS in common.py; references are in the subset of their species) and distance_summary.tsv (n, pairs, min / median /
+DISTANCE_SUBSETS in common.py: the complex, the MST subsets incl. the combined `minor`, and each minor species; references are in the subset of their species) and distance_summary.tsv (n, pairs, min / median /
 max distance and number of identical pairs per subset).
 """
 from __future__ import annotations
@@ -17,7 +17,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from common import SUBSETS, load_cohort, read_meg, species_of
+from common import DISTANCE_SUBSETS, load_cohort, read_meg, species_of
 from kansasii_paths import IMM_DIR, OUT_RIDOM, SCREENING_MAP_RESULTS
 
 
@@ -53,7 +53,7 @@ def main() -> int:
         return 1
     a.out.mkdir(parents=True, exist_ok=True)
     rows = []
-    for name, wanted in SUBSETS.items():
+    for name, wanted in DISTANCE_SUBSETS.items():
         d = subset_matrix(dist, species, wanted)
         d.rename_axis("Sample ID").to_csv(a.out / f"distance_{name}.tsv", sep="\t")
         rows.append(summarize(name, d))
