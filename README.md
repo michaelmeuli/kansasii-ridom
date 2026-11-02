@@ -9,7 +9,7 @@ The input to Ridom is `output/kansasii-ridom/ridom_assemblies.{tar.gz,zip}` (`sc
 `kansasii-cgmlst/scripts/10_export_ridom.py` plus M055 (182 genomes); plasmids are removed by Ridom, not here.
 
 ```bash
-sbatch submit_all.sbatch      # export check (scripts/00) + distance matrices (02) -> output/kansasii-ridom/results/
+sbatch submit_all.sbatch      # export check (00) + all derived tables (02-08) -> output/kansasii-ridom/results/
 sbatch submit_export.sbatch   # archives for Ridom (scripts/01, ~20 min) -> output/kansasii-ridom/
 ```
 
@@ -17,17 +17,21 @@ sbatch submit_export.sbatch   # archives for Ridom (scripts/01, ~20 min) -> outp
 |---|---|
 | `00_check_exports.py` | compares `data/imm/ridom-*` with `config/expected_exports.tsv` (the 12 exports of RIDOM.md) and the isolates each must hold -> `export_status.tsv` (MISSING / INCOMPLETE / EXTRA / OK / UNCHECKED); `--strict` exits 1 unless all are fine |
 | `02_distance_matrices.py` | `ridom-distance-complex-mkan329.meg` (SeqSphere+ MEGA, pairwise ignore) -> `distance_<subset>.tsv` for each subset of `DISTANCE_SUBSETS` (`SUBSETS` + one per minor species; submatrices of the complex one) + `distance_summary.tsv` |
+| `03_scheme.py` | `ridom-scheme-mkan329.tasktemplate` (gzip XML) -> core targets, core / accessory / discarded classes, Target Definer filters, funnel, genomes, settings, `scheme_summary.tsv`, `scheme_parameters.txt`; checks the comparison-table loci = core targets |
+| `04_qc.py` | comparison table -> `qc.tsv` (good targets %, genome size, missing targets; consistency with Ridom's own columns), `qc_summary.tsv`, `locus_stats.tsv`, `target_failures.tsv` |
+| `05_clusters.py` | `ridom-clusters.csv` + distances -> `clusters.tsv` (all isolates incl. singletons, nearest neighbour), `cluster_summary.tsv`, `cluster_threshold.tsv` (Ridom's clusters = single linkage at <= 5 alleles; exit 1 if no threshold matches) |
+| `06_mst_trees.py` | distances -> `mst_nodes.tsv`, `mst_edges.tsv` (node = isolates at distance 0), `tree_upgma_<subset>.nwk` per subset |
+| `07_control_distances.py` | controls (NR 128/132/133) vs. same-species references and nearest isolates -> `control_distances.tsv` |
+| `08_paper_numbers.py` | `paper_numbers.md` (methods / results figures with their source file) and `paper_species_table.tsv` |
 | `01_export_ridom.py` | `ridom_assemblies.{tar.gz,zip}` for SeqSphere+ (`ridom/assemblies/<name>.fasta`, `ridom/metadata.tsv`): the pool of 175 complex isolates incl. M055 (names `M001` ..., controls by `LABEL`) + the 7 GTDB references from `GTDB_REPRESENTATIVES` (`<acc>_query.fasta`, unchanged). Written to `.part` and renamed when complete |
 
-Next steps (not written yet, they need the exports): MST node tables per subset, cluster table joined to
-`screening_map_results.csv`, report figures. Add each as the next numbered script when its export format has been seen, and fill
-`id_column` for it in `config/expected_exports.tsv`.
+Only the MST figures (SVG / PDF per subset) are still a pure GUI export; everything else the paper needs is derived from the four exports in hand (`kansasii-docs/docs/RIDOM.md`). Failure reasons, new-allele flags and target coordinates are not in any export.
 
 ## Layout
 
 ```
-scripts/            00_check_exports.py, 01_export_ridom.py, common.py (cohort, subsets, ridom_id, REFERENCES); kansasii_paths.py = shared constants (vendored)
-config/             expected_exports.tsv: the exports still needed and the cohort each must cover
+scripts/            00_check_exports.py, 01_export_ridom.py, 02-08 (derived tables), common.py, graph.py (clusters, MST, UPGMA), scheme.py (task template) (cohort, subsets, ridom_id, REFERENCES); kansasii_paths.py = shared constants (vendored)
+config/             expected_exports.tsv: the five GUI exports and the cohort each must cover
 tests/              pytest
 submit_all.sbatch   runs scripts/00 (log in output/kansasii-ridom/logs/); submit_export.sbatch runs scripts/01
 ```

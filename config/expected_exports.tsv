@@ -1,20 +1,14 @@
 # Exports of Ridom SeqSphere+ that replace kansasii-mst / kansasii-cgmlst (numbers as in kansasii-docs/docs/RIDOM.md).
+# Only what a script cannot derive from the other exports is listed. Everything else is computed by scripts/03-08 (see README).
 # file     : name in data/imm/ ({subset} is replaced by each subset below)
-# id_column: column with the Sample ID (empty = format not seen yet, only presence is checked; `labels` = the labels of a .meg matrix)
+# id_column: column with the Sample ID (empty = presence only; `labels` = the labels of a .meg matrix)
 # cohort   : keep = isolates of the cohort without `excluded` (174); pool = also those excluded only by low coverage (M055, 175)
 # refs     : yes = the 7 public GTDB references (GCF_*) must be in the file too
 # subsets  : none = one file; else one file per subset of SUBSETS in common.py
+# replaces : what the export serves / the scripts derived from it
 no	file	id_column	cohort	refs	subsets	replaces
-1	ridom-comparison-table-mkan329.csv	Sample ID	pool	yes	none	allele table, shared_loci_*.csv
-2	ridom-distance-complex-mkan329.meg	labels	keep	yes	none	allele_distance_*.csv (pairwise ignore; subsets are sliced in code)
-3	ridom-mst-nodes-{subset}-mkan329.csv		keep	yes	all	mst_nodes_*.tsv
-4	ridom-mst-{subset}-mkan329.svg		keep	yes	all	mst_cgmlst_*, mst_* figures
-5	ridom-clusters.csv	Sample ID	keep	yes	none	cluster tables, SNP thresholds
-6	ridom-scheme-mkan329.csv		keep	no	none	scheme_summary.tsv, schema_evaluator_loci.tsv
-6	ridom-scheme-parameters.txt		keep	no	none	README scheme table
-7	ridom-qc-mkan329.csv	Sample ID	pool	yes	none	sample_qc.tsv (cgmlst_called_pct)
-8	ridom-target-failures-mkan329.csv		pool	yes	none	allele_call reports
-9	ridom-control-distances-mkan329.csv		keep	yes	none	control_check.tsv
-10	ridom-tree-{subset}-mkan329.nwk		keep	yes	all	(new)
-11	ridom-mlst-mkan329.csv		keep	no	none	ST of metadata.tsv
-12	ridom-isolate-data-mkan329.csv		keep	no	none	ridom/metadata.tsv
+1	ridom-comparison-table-mkan329.csv	Sample ID	pool	yes	none	allele profiles: 04_qc (per-isolate QC, failed targets, locus stats), shared_loci_*.csv
+2	ridom-distance-complex-mkan329.meg	labels	keep	yes	none	allele distances: 02 (subsets), 05 (cluster threshold), 06 (MST nodes / edges, UPGMA trees), 07 (controls)
+4	ridom-mst-{subset}-mkan329.svg		keep	yes	all	MST figures drawn by SeqSphere+ (layout and colours are not reproducible in code)
+5	ridom-clusters.csv	Sample ID	keep	yes	none	Ridom's MST clusters: 05 (threshold, singletons, nearest neighbours)
+6	ridom-scheme-mkan329.tasktemplate			no	none	scheme + Target Definer report: 03 (targets, filters, settings, parameters.txt)

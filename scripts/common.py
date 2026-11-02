@@ -88,6 +88,49 @@ def read_meg(path: Path) -> pd.DataFrame:
     return pd.DataFrame(mat.astype(int), index=labels, columns=labels)
 
 
+COMPARISON_META = {"#Missing values in Distance Columns": "missing_ridom", "Perc. Good Targets": "good_pct",
+                   "Approximated Genome Size (Mbases)": "genome_mbases", "Species": "species_ridom"}
+
+
+def sniff_sep(path: Path) -> str:
+    """Ridom writes `;`-separated CSV; accept `,` too."""
+    header = path.read_text(encoding="utf-8-sig").splitlines()[0]
+    return ";" if header.count(";") > header.count(",") else ","
+
+
+def read_comparison(path: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Comparison table of SeqSphere+ -> (meta, alleles), both indexed by Sample ID.
+
+    meta: missing_ridom (int), good_pct, genome_mbases (float), species_ridom. alleles: one column per target, allele number
+    as text, `""` = no allele called (missing / failed; Ridom does not export the reason).
+    """
+    t = pd.read_csv(path, sep=sniff_sep(path), encoding="utf-8-sig", dtype=str, keep_default_na=False)
+    t = t.loc[:, [c for c in t.columns if c and not c.startswith("Unnamed")]]
+    absent = [c for c in [*COMPARISON_META, "Sample ID"] if c not in t.columns]
+    if absent:
+        raise ValueError(f"{path}: columns missing: {absent}")
+    if t["Sample ID"].duplicated().any():
+        raise ValueError(f"{path}: duplicate Sample ID")
+    t = t.set_index("Sample ID")
+    meta = t[list(COMPARISON_META)].rename(columns=COMPARISON_META)
+    meta = meta.astype({"missing_ridom": int, "good_pct": float, "genome_mbases": float})
+    return meta, t.drop(columns=list(COMPARISON_META))
+
+
+def read_clusters(path: Path) -> pd.Series[str]:
+    """Sample ID -> MST cluster label of the Ridom cluster export (`""` = not in a cluster)."""
+    t = pd.read_csv(path, sep=sniff_sep(path), encoding="utf-8-sig", dtype=str, keep_default_na=False)
+    return pd.Series(t["-Group-"].to_numpy(), index=t["Sample ID"].to_numpy(), dtype=str)
+
+
+def kind_of(sample: str, cohort: pd.DataFrame) -> str:
+    """`reference` (GCF_*), `control` (strain with a LABEL) or `isolate`."""
+    if sample.startswith(REFERENCE_PREFIX):
+        return "reference"
+    row = cohort[cohort.ridom_id == sample]
+    return "control" if len(row) and row.label.iloc[0] else "isolate"
+
+
 def species_of(cohort: pd.DataFrame) -> dict[str, str]:
     """Sample ID -> species for the cohort and the GTDB references."""
     return {**dict(zip(cohort.ridom_id, cohort.species)), **REFERENCES}
