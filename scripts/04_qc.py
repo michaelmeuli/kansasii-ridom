@@ -1,6 +1,6 @@
 """Per-isolate QC and per-locus statistics from the Ridom comparison table (exports 7 and 8 of RIDOM.md).
 
-Reads data/imm/ridom-comparison-table-mkan329.csv (pool incl. M055 + the 7 references). Ridom writes no allele for a target
+Reads data/imm/ridom-comparison-table.csv (pool incl. M055 + the 7 references). Ridom writes no allele for a target
 it could not call and does not export the reason, so a failure here is "no allele". Writes to output/kansasii-ridom/results/:
   qc.tsv               per isolate: kind, species, good targets %, genome size, missing / called targets (recomputed and Ridom's)
   qc_summary.tsv       per species and for all isolates: n, good targets and genome size (median, min, max)
@@ -69,12 +69,12 @@ def locus_stats(alleles: pd.DataFrame) -> pd.DataFrame:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--imm-dir", type=Path, default=IMM_DIR, help="folder with the ridom-* exports")
-    ap.add_argument("--comparison-table", type=Path, help="default: <imm-dir>/ridom-comparison-table-mkan329.csv")
+    ap.add_argument("--comparison-table", type=Path, help="default: <imm-dir>/ridom-comparison-table.csv")
     ap.add_argument("--screening-map-results", type=Path, default=SCREENING_MAP_RESULTS)
     ap.add_argument("--out", type=Path, default=OUT_RIDOM / "results")
     a = ap.parse_args()
 
-    meta, alleles = read_comparison(a.comparison_table or a.imm_dir / "ridom-comparison-table-mkan329.csv")
+    meta, alleles = read_comparison(a.comparison_table or a.imm_dir / "ridom-comparison-table.csv")
     qc = qc_table(meta, alleles, load_cohort(a.screening_map_results))
     a.out.mkdir(parents=True, exist_ok=True)
     qc.to_csv(a.out / "qc.tsv", sep="\t", index=False)

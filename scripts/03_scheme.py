@@ -30,7 +30,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--imm-dir", type=Path, default=IMM_DIR, help="folder with the ridom-* exports")
     ap.add_argument("--tasktemplate", type=Path, help="default: <imm-dir>/ridom-scheme-mkan329.tasktemplate")
-    ap.add_argument("--comparison-table", type=Path, help="default: <imm-dir>/ridom-comparison-table-mkan329.csv")
+    ap.add_argument("--comparison-table", type=Path, help="default: <imm-dir>/ridom-comparison-table.csv")
     ap.add_argument("--out", type=Path, default=OUT_RIDOM / "results")
     a = ap.parse_args()
 
@@ -101,7 +101,7 @@ def main() -> int:
     n_dis = int((cl["class"] == "discarded").sum())
     if acc and int(acc[1]) != n_acc or disc and int(disc[1]) != n_dis:
         problems.append(f"accessory/discarded listed {n_acc}/{n_dis}, report {acc[1] if acc else '?'}/{disc[1] if disc else '?'}")
-    table = a.comparison_table or a.imm_dir / "ridom-comparison-table-mkan329.csv"
+    table = a.comparison_table or a.imm_dir / "ridom-comparison-table.csv"
     if table.exists():
         in_table = set(read_comparison(table)[1].columns)
         summary["comparison_table_loci_equal_core"] = str(in_table == set(core)).lower()
