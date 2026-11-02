@@ -43,7 +43,7 @@ def main() -> int:
     ap.add_argument("--out", type=Path, default=OUT_RIDOM / "results")
     a = ap.parse_args()
 
-    dist = read_meg(a.imm_dir / "ridom-distance-complex-mkan329.meg")
+    dist = read_meg(a.imm_dir / "ridom-distance-matrix.meg")
     species = species_of(load_cohort(a.screening_map_results))
     clusters = read_clusters(a.imm_dir / "ridom-clusters.csv")
     a.out.mkdir(parents=True, exist_ok=True)

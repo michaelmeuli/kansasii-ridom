@@ -1,6 +1,6 @@
 """Allele-distance matrices per subset from the complex-wide Ridom export (export 2 of RIDOM.md).
 
-Reads data/imm/ridom-distance-complex-mkan329.meg (SeqSphere+ MEGA, lower triangle). Missing values were handled by
+Reads data/imm/ridom-distance-matrix.meg (SeqSphere+ MEGA, lower triangle). Missing values were handled by
 Ridom when it computed the matrix (pairwise ignore, see the export log of RIDOM.md); under pairwise ignore the distance of
 a pair does not depend on the other isolates, so a subset matrix is the submatrix of the complex one.
 
@@ -45,12 +45,12 @@ def summarize(name: str, d: pd.DataFrame) -> dict[str, object]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--imm-dir", type=Path, default=IMM_DIR, help="folder with the ridom-* exports")
-    ap.add_argument("--meg", type=Path, help="default: <imm-dir>/ridom-distance-complex-mkan329.meg")
+    ap.add_argument("--meg", type=Path, help="default: <imm-dir>/ridom-distance-matrix.meg")
     ap.add_argument("--screening-map-results", type=Path, default=SCREENING_MAP_RESULTS)
     ap.add_argument("--out", type=Path, default=OUT_RIDOM / "results")
     a = ap.parse_args()
 
-    dist = read_meg(a.meg or a.imm_dir / "ridom-distance-complex-mkan329.meg")
+    dist = read_meg(a.meg or a.imm_dir / "ridom-distance-matrix.meg")
     cohort = load_cohort(a.screening_map_results)
     species = species_of(cohort)
     unknown = [i for i in dist.index if i not in species]

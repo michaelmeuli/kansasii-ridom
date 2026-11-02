@@ -37,7 +37,7 @@ def main() -> int:
     ap.add_argument("--screening-map-results", type=Path, default=SCREENING_MAP_RESULTS)
     ap.add_argument("--out", type=Path, default=OUT_RIDOM / "results")
     a = ap.parse_args()
-    out = control_rows(read_meg(a.imm_dir / "ridom-distance-complex-mkan329.meg"), load_cohort(a.screening_map_results))
+    out = control_rows(read_meg(a.imm_dir / "ridom-distance-matrix.meg"), load_cohort(a.screening_map_results))
     a.out.mkdir(parents=True, exist_ok=True)
     out.to_csv(a.out / "control_distances.tsv", sep="\t", index=False)
     print(out.to_string(index=False))
