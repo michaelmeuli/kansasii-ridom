@@ -1,12 +1,12 @@
 # Exports of Ridom SeqSphere+ that replace kansasii-mst / kansasii-cgmlst (numbers as in kansasii-docs/docs/RIDOM.md).
 # file     : name in data/imm/ ({subset} is replaced by each subset below)
-# id_column: column with the Sample ID (empty = format not seen yet, only presence is checked)
+# id_column: column with the Sample ID (empty = format not seen yet, only presence is checked; `labels` = the labels of a .meg matrix)
 # cohort   : keep = isolates of the cohort without `excluded` (174); pool = also those excluded only by low coverage (M055, 175)
 # refs     : yes = the 7 public GTDB references (GCF_*) must be in the file too
 # subsets  : none = one file; else one file per subset of SUBSETS in common.py
 no	file	id_column	cohort	refs	subsets	replaces
 1	ridom-comparison-table-mkan329.csv	Sample ID	pool	yes	none	allele table, shared_loci_*.csv
-2	ridom-distance-complex-mkan329.meg		keep	yes	none	allele_distance_*.csv (pairwise ignore; subsets are sliced in code)
+2	ridom-distance-complex-mkan329.meg	labels	keep	yes	none	allele_distance_*.csv (pairwise ignore; subsets are sliced in code)
 3	ridom-mst-nodes-{subset}-mkan329.csv		keep	yes	all	mst_nodes_*.tsv
 4	ridom-mst-{subset}-mkan329.svg		keep	yes	all	mst_cgmlst_*, mst_* figures
 5	ridom-clusters.csv	Sample ID	keep	yes	none	cluster tables, SNP thresholds

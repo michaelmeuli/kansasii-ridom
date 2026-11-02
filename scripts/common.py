@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from kansasii_paths import COHORT_SPECIES, OUT_RIDOM, SCREENING_MAP_RESULTS
@@ -47,3 +48,42 @@ def load_cohort(results: Path = SCREENING_MAP_RESULTS) -> pd.DataFrame:
                          "label": m.LABEL,
                          "species": m.species,
                          "keep": m.excluded.str.lower() != "true"}).reset_index(drop=True)
+
+
+def meg_label(raw: str) -> str:
+    """Sample ID of a MEGA label: Ridom writes the accessions as GCF_000157895_3 for GCF_000157895.3."""
+    return re.sub(r"^(GCF_\d+)_(\d+)$", r"\1.\2", raw)
+
+
+def read_meg(path: Path) -> pd.DataFrame:
+    """Square distance matrix (int, index = columns = Sample ID) from a SeqSphere+ MEGA export (`DataFormat=LowerLeft`).
+
+    Labels (`#id`) come first, then the lower triangle without the diagonal. Raises ValueError if the file does not
+    match its own header (NTaxa, number of values) or has duplicate labels.
+    """
+    lines = path.read_text(encoding="utf-8-sig").splitlines()
+    if not lines or lines[0].strip().lower() != "#mega":
+        raise ValueError(f"{path}: not a MEGA file (first line must be #mega)")
+    fmt = " ".join(ln for ln in lines if ln.lower().startswith("!format"))
+    m = re.search(r"NTaxa=(\d+)", fmt, re.I)
+    if not m or not re.search(r"DataFormat=LowerLeft", fmt, re.I) or not re.search(r"DataType=distance", fmt, re.I):
+        raise ValueError(f"{path}: expected '!Format DataType=distance DataFormat=LowerLeft NTaxa=n', got '{fmt}'")
+    n = int(m.group(1))
+    labels = [meg_label(ln[1:].strip()) for ln in lines[1:] if ln.startswith("#")]
+    if len(labels) != n or len(set(labels)) != n:
+        raise ValueError(f"{path}: NTaxa={n} but {len(labels)} labels ({len(set(labels))} unique)")
+    last = max(i for i, ln in enumerate(lines) if ln.startswith("#"))
+    values = [float(t) for ln in lines[last + 1:] for t in ln.split()]
+    if len(values) != n * (n - 1) // 2:
+        raise ValueError(f"{path}: {len(values)} values, lower triangle of {n} taxa needs {n * (n - 1) // 2}")
+    mat = np.zeros((n, n))
+    mat[np.tril_indices(n, -1)] = values  # row-major: row 1 has 1 value, row 2 has 2, ...
+    mat = mat + mat.T
+    if not np.array_equal(mat, np.rint(mat)):
+        raise ValueError(f"{path}: allele distances must be integers")
+    return pd.DataFrame(mat.astype(int), index=labels, columns=labels)
+
+
+def species_of(cohort: pd.DataFrame) -> dict[str, str]:
+    """Sample ID -> species for the cohort and the GTDB references."""
+    return {**dict(zip(cohort.ridom_id, cohort.species)), **REFERENCES}

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Check the Ridom exports in data/imm against the list of exports still needed (scripts/00 only; the archive for Ridom is submit_export.sbatch).
+# Check the Ridom exports in data/imm against the list of exports still needed (scripts/00, 02; the archive for Ridom is submit_export.sbatch).
 #   sbatch submit_all.sbatch
 # Inputs : data/imm/ridom-*, data/imm/screening_map_results.csv
-# Outputs: output/kansasii-ridom/results/export_status.tsv
+# Outputs: output/kansasii-ridom/results/export_status.tsv, distance_<subset>.tsv, distance_summary.tsv
 #SBATCH --job-name=kansasii-ridom
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
@@ -18,6 +18,8 @@ conda activate env_ridom
 cd "$REPO/scripts"
 echo "=== 00_check_exports.py ($(date +%T))"
 python 00_check_exports.py
+echo "=== 02_distance_matrices.py ($(date +%T))"
+python 02_distance_matrices.py
 echo "done $(date +%T)"
 
 # provenance (see kansasii-docs/docs/PROVENANCE.md)

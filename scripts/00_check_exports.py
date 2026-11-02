@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from common import REFERENCE_PREFIX, SUBSETS, load_cohort
+from common import REFERENCE_PREFIX, SUBSETS, load_cohort, read_meg
 from kansasii_paths import IMM_DIR, OUT_RIDOM, SCREENING_MAP_RESULTS
 
 EXPECTED = Path(__file__).resolve().parents[1] / "config/expected_exports.tsv"
@@ -32,9 +32,15 @@ def check_file(path: Path, id_column: str, want: set[str], refs: bool) -> tuple[
         return "MISSING", ""
     if not id_column:
         return "UNCHECKED", "format not seen yet, only presence checked"
-    header = path.read_text(encoding="utf-8-sig").splitlines()[0]
-    sep = ";" if header.count(";") > header.count(",") else ","
-    ids = set(pd.read_csv(path, sep=sep, encoding="utf-8-sig", usecols=[id_column], dtype=str)[id_column].dropna())
+    if path.suffix == ".meg":  # MEGA distance matrix: the ids are its labels (id_column is only a marker, `labels`)
+        try:
+            ids = set(read_meg(path).index)
+        except ValueError as e:
+            return "INCOMPLETE", f"unreadable: {e}"
+    else:
+        header = path.read_text(encoding="utf-8-sig").splitlines()[0]
+        sep = ";" if header.count(";") > header.count(",") else ","
+        ids = set(pd.read_csv(path, sep=sep, encoding="utf-8-sig", usecols=[id_column], dtype=str)[id_column].dropna())
     have_refs = {i for i in ids if i.startswith(REFERENCE_PREFIX)}
     missing = sorted(want - ids)
     extra = sorted(ids - want - (have_refs if refs else set()))

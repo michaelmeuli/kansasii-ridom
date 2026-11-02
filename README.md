@@ -9,16 +9,17 @@ The input to Ridom is `output/kansasii-ridom/ridom_assemblies.{tar.gz,zip}` (`sc
 `kansasii-cgmlst/scripts/10_export_ridom.py` plus M055 (182 genomes); plasmids are removed by Ridom, not here.
 
 ```bash
-sbatch submit_all.sbatch      # export check (scripts/00) -> output/kansasii-ridom/results/
+sbatch submit_all.sbatch      # export check (scripts/00) + distance matrices (02) -> output/kansasii-ridom/results/
 sbatch submit_export.sbatch   # archives for Ridom (scripts/01, ~20 min) -> output/kansasii-ridom/
 ```
 
 | Script | Does |
 |---|---|
 | `00_check_exports.py` | compares `data/imm/ridom-*` with `config/expected_exports.tsv` (the 12 exports of RIDOM.md) and the isolates each must hold -> `export_status.tsv` (MISSING / INCOMPLETE / EXTRA / OK / UNCHECKED); `--strict` exits 1 unless all are fine |
+| `02_distance_matrices.py` | `ridom-distance-complex-mkan329.meg` (SeqSphere+ MEGA, pairwise ignore) -> `distance_<subset>.tsv` for each subset of `SUBSETS` (submatrices of the complex one) + `distance_summary.tsv` |
 | `01_export_ridom.py` | `ridom_assemblies.{tar.gz,zip}` for SeqSphere+ (`ridom/assemblies/<name>.fasta`, `ridom/metadata.tsv`): the pool of 175 complex isolates incl. M055 (names `M001` ..., controls by `LABEL`) + the 7 GTDB references from `GTDB_REPRESENTATIVES` (`<acc>_query.fasta`, unchanged). Written to `.part` and renamed when complete |
 
-Next steps (not written yet, they need the exports): distance matrices and MST node tables per subset, cluster table joined to
+Next steps (not written yet, they need the exports): MST node tables per subset, cluster table joined to
 `screening_map_results.csv`, report figures. Add each as the next numbered script when its export format has been seen, and fill
 `id_column` for it in `config/expected_exports.tsv`.
 
