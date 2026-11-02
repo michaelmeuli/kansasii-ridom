@@ -1,6 +1,6 @@
 """Scheme definition from the Ridom task template (export 6 of RIDOM.md): core targets, Target Definer settings and filters.
 
-Reads data/imm/ridom-scheme-mkan329.tasktemplate (gzip XML, SeqSphere+ "Export task template"); the Target Definer report is
+Reads data/imm/ridom-scheme.tasktemplate (gzip XML, SeqSphere+ "Export task template"); the Target Definer report is
 embedded in it, so no separate parameter export is needed. Writes to output/kansasii-ridom/results/:
   scheme_targets.tsv           core targets: locus tag, gene, product, protein id, length, strand, start/stop
   scheme_loci_classes.tsv      every locus the Target Definer saw: core / accessory / discarded and the filter that decided
@@ -29,12 +29,12 @@ from scheme import LOCUS, parse_filters, parse_funnel, parse_genomes, read_taskt
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--imm-dir", type=Path, default=IMM_DIR, help="folder with the ridom-* exports")
-    ap.add_argument("--tasktemplate", type=Path, help="default: <imm-dir>/ridom-scheme-mkan329.tasktemplate")
+    ap.add_argument("--tasktemplate", type=Path, help="default: <imm-dir>/ridom-scheme.tasktemplate")
     ap.add_argument("--comparison-table", type=Path, help="default: <imm-dir>/ridom-comparison-table.csv")
     ap.add_argument("--out", type=Path, default=OUT_RIDOM / "results")
     a = ap.parse_args()
 
-    s = read_tasktemplate(a.tasktemplate or a.imm_dir / "ridom-scheme-mkan329.tasktemplate")
+    s = read_tasktemplate(a.tasktemplate or a.imm_dir / "ridom-scheme.tasktemplate")
     a.out.mkdir(parents=True, exist_ok=True)
     targets = pd.DataFrame(s.targets)
     core = list(targets.locus_tag)

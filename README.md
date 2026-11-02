@@ -17,7 +17,7 @@ sbatch submit_export.sbatch   # archives for Ridom (scripts/01, ~20 min) -> outp
 |---|---|
 | `00_check_exports.py` | compares `data/imm/ridom-*` with `config/expected_exports.tsv` (the 12 exports of RIDOM.md) and the isolates each must hold -> `export_status.tsv` (MISSING / INCOMPLETE / EXTRA / OK / UNCHECKED); `--strict` exits 1 unless all are fine |
 | `02_distance_matrices.py` | `ridom-distance-matrix.meg` (SeqSphere+ MEGA, pairwise ignore) -> `distance_<subset>.tsv` for each subset of `DISTANCE_SUBSETS` (`SUBSETS` + one per minor species; submatrices of the complex one) + `distance_summary.tsv` |
-| `03_scheme.py` | `ridom-scheme-mkan329.tasktemplate` (gzip XML) -> core targets, core / accessory / discarded classes, Target Definer filters, funnel, genomes, settings, `scheme_summary.tsv`, `scheme_parameters.txt`; checks the comparison-table loci = core targets |
+| `03_scheme.py` | `ridom-scheme.tasktemplate` (gzip XML) -> core targets, core / accessory / discarded classes, Target Definer filters, funnel, genomes, settings, `scheme_summary.tsv`, `scheme_parameters.txt`; checks the comparison-table loci = core targets |
 | `04_qc.py` | comparison table -> `qc.tsv` (good targets %, genome size, missing targets; consistency with Ridom's own columns), `qc_summary.tsv`, `locus_stats.tsv`, `target_failures.tsv` |
 | `05_clusters.py` | `ridom-clusters.csv` + distances -> `clusters.tsv` (all isolates incl. singletons, nearest neighbour), `cluster_summary.tsv`, `cluster_threshold.tsv` (Ridom's clusters = single linkage at <= 5 alleles; exit 1 if no threshold matches) |
 | `06_mst_trees.py` | distances -> `mst_nodes.tsv`, `mst_edges.tsv` (node = isolates at distance 0), `tree_upgma_<subset>.nwk` per subset |
