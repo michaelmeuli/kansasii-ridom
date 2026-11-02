@@ -17,7 +17,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from common import DISTANCE_SUBSETS, load_cohort, read_meg, species_of
+from common import DISTANCE_SUBSETS, REFERENCE_PREFIX, load_cohort, read_meg, species_of
 from kansasii_paths import IMM_DIR, OUT_RIDOM, SCREENING_MAP_RESULTS
 
 
@@ -29,11 +29,17 @@ def subset_matrix(dist: pd.DataFrame, species: dict[str, str], wanted: list[str]
     return dist.loc[keep, keep]
 
 
-def summarize(name: str, d: pd.DataFrame) -> dict[str, object]:
+def _stats(d: pd.DataFrame, prefix: str = "") -> dict[str, object]:
     pairs = d.to_numpy()[np.triu_indices(len(d), 1)]
-    return {"subset": name, "n": len(d), "pairs": len(pairs),
-            "min": int(pairs.min()) if len(pairs) else "", "median": float(np.median(pairs)) if len(pairs) else "",
-            "max": int(pairs.max()) if len(pairs) else "", "identical_pairs": int((pairs == 0).sum())}
+    return {f"{prefix}n": len(d), f"{prefix}pairs": len(pairs),
+            f"{prefix}min": int(pairs.min()) if len(pairs) else "", f"{prefix}median": float(np.median(pairs)) if len(pairs) else "",
+            f"{prefix}max": int(pairs.max()) if len(pairs) else "", f"{prefix}identical_pairs": int((pairs == 0).sum())}
+
+
+def summarize(name: str, d: pd.DataFrame) -> dict[str, object]:
+    """Distance statistics of a subset over all genomes, and (prefix `iso_`) over the isolates only, without the GCF_* references."""
+    iso = [i for i in d.index if not i.startswith(REFERENCE_PREFIX)]
+    return {"subset": name, **_stats(d), **_stats(d.loc[iso, iso], "iso_")}
 
 
 def main() -> int:

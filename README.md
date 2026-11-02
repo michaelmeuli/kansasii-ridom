@@ -6,7 +6,7 @@ Why, which exports are needed and what Ridom cannot replace: `kansasii-docs/docs
 
 Ridom is run by hand in the GUI. Its exports go **unedited** to `data/imm/ridom-<content>-mkan329[-<subset>].<ext>`; this repo only reads them.
 The input to Ridom is `output/kansasii-ridom/ridom_assemblies.{tar.gz,zip}` (`scripts/01_export_ridom.py`): the same export as the earlier
-`kansasii-cgmlst/scripts/10_export_ridom.py` plus M055 (182 genomes); plasmids are removed by Ridom, not here.
+`kansasii-cgmlst/scripts/10_export_ridom.py` plus M055 (182 genomes), except that the ATCC 12478 reference GCF_000157895.3 keeps its plasmid contig (plasmids are removed by Ridom, not here).
 
 ```bash
 sbatch submit_all.sbatch      # export check (00) + all derived tables (02-08) -> output/kansasii-ridom/results/

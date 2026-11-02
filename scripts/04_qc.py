@@ -19,6 +19,8 @@ import pandas as pd
 from common import kind_of, load_cohort, read_comparison
 from kansasii_paths import IMM_DIR, OUT_RIDOM, SCREENING_MAP_RESULTS
 
+GOOD_PCT_TOLERANCE = 0.05 + 1e-9
+
 
 def qc_table(meta: pd.DataFrame, alleles: pd.DataFrame, cohort: pd.DataFrame) -> pd.DataFrame:
     n_loci = alleles.shape[1]
@@ -37,8 +39,9 @@ def qc_table(meta: pd.DataFrame, alleles: pd.DataFrame, cohort: pd.DataFrame) ->
         "targets_called": (n_loci - missing).to_numpy(),
         "missing_ridom": meta.missing_ridom.to_numpy(),
     })
+    # Ridom shows the good-target % with one decimal; allow its rounding (<= 0.05) instead of reproducing the rounding rule
     out["consistent"] = (out.targets_missing == out.missing_ridom) & (
-        (100 * out.targets_called / n_loci).round(1) == out.good_targets_pct)
+        (100 * out.targets_called / n_loci - out.good_targets_pct).abs() <= GOOD_PCT_TOLERANCE)
     return out
 
 

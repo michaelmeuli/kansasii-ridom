@@ -16,15 +16,15 @@ OUTPUT=$OUT_RIDOM/results
 source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate env_ridom
 cd "$REPO/scripts"
-echo "=== 00_check_exports.py ($(date +%T))"
-python 00_check_exports.py
-echo "=== 02_distance_matrices.py ($(date +%T))"
-python 02_distance_matrices.py
-for s in 03_scheme 04_qc 05_clusters 06_mst_trees 07_control_distances 08_paper_numbers; do
-  echo "=== $s.py ($(date +%T))"
-  python $s.py
-done
-echo "done $(date +%T)"
+# A failing check (exit 1) must not hide the other tables: run every step, remember failures, exit 1 at the end.
+# 08 reads the results of 02-07, so it only runs when all of them succeeded (no stale files).
+rc=0
+run() { echo "=== $1.py ($(date +%T))"; python "$1.py" || { echo "FAILED: $1.py"; rc=1; }; }
+run 00_check_exports
+for s in 02_distance_matrices 03_scheme 04_qc 05_clusters 06_mst_trees 07_control_distances; do run $s; done
+if [ "$rc" -eq 0 ]; then run 08_paper_numbers; else echo "SKIPPED: 08_paper_numbers.py (earlier step failed)"; fi
+echo "done $(date +%T) (exit $rc)"
 
 # provenance (see kansasii-docs/docs/PROVENANCE.md)
 bash "$MANIFEST_SCRIPT" "$OUTPUT" "$REPO" submit_all.sbatch "$SCREENING_MAP_RESULTS" "$IMM_DIR"
+exit $rc

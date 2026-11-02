@@ -74,13 +74,15 @@ def test_subset_and_summary(tmp_path: Path) -> None:
     s = dm.summarize("kansasii", k)
     assert (s["n"], s["pairs"], s["min"], s["max"], s["identical_pairs"]) == (2, 1, 1, 1, 0)
     assert dm.summarize("pseudokansasii", dm.subset_matrix(d, sp, ["pseudokansasii"]))["pairs"] == 0
+    full = dm.summarize("complex", d)  # isolates only: the GCF_* reference is left out of the iso_ columns
+    assert full["n"] == 4 and full["iso_n"] == 3 and full["iso_pairs"] == 3
 
 
 def test_check_file_meg(tmp_path: Path) -> None:
     p = _write(tmp_path)
-    assert check.check_file(p, "labels", {"M001", "M002", "M003"}, True)[0] == "OK"
-    assert check.check_file(p, "labels", {"M001", "M002", "M003", "M004"}, True)[0] == "INCOMPLETE"
-    assert check.check_file(_write(tmp_path, "garbage"), "labels", set(), False)[0] == "INCOMPLETE"
+    assert check.check_file(p, "labels", {"M001", "M002", "M003"}, {"GCF_900566075.1"})[0] == "OK"
+    assert check.check_file(p, "labels", {"M001", "M002", "M003", "M004"}, {"GCF_900566075.1"})[0] == "INCOMPLETE"
+    assert check.check_file(_write(tmp_path, "garbage"), "labels", set(), set())[0] == "INCOMPLETE"
 
 
 def test_distance_subsets() -> None:

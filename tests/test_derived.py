@@ -147,6 +147,8 @@ def test_comparison_and_qc(tmp_path: Path) -> None:
     assert list(ls.n_missing) == [0, 1, 0, 0] and list(ls.n_alleles) == [1, 1, 1, 1]
     meta.loc["M001", "good_pct"] = 80.0
     assert not qc_mod.qc_table(meta, al, cohort).consistent.all()
+    meta.loc["M001", "good_pct"] = 75.04  # within Ridom's one-decimal rounding
+    assert qc_mod.qc_table(meta, al, cohort).consistent.all()
 
 
 def test_clusters_file(tmp_path: Path) -> None:
@@ -167,11 +169,15 @@ def test_control_rows() -> None:
 
 
 def test_species_table() -> None:
-    qc = pd.DataFrame({"sample": ["M001", "M002", "GCF_000157895.3"], "kind": ["isolate", "isolate", "reference"],
-                       "species": ["kansasii"] * 3, "good_targets_pct": [99.0, 98.0, 100.0], "genome_mbases": [6.4, 6.3, 6.4]})
-    ds = pd.DataFrame({"subset": ["kansasii"], "median": [3.0], "min": [1], "max": [5], "identical_pairs": [0]})
+    qc = pd.DataFrame({"sample": ["M001", "M002", "M055", "GCF_000157895.3"], "kind": ["isolate", "isolate", "isolate", "reference"],
+                       "species": ["kansasii"] * 4, "cohort": ["keep", "keep", "pool_only", "reference"],
+                       "good_targets_pct": [99.0, 98.0, 60.0, 100.0], "genome_mbases": [6.4, 6.3, 6.0, 6.4]})
+    ds = pd.DataFrame({"subset": ["kansasii"], "median": [9.0], "min": [0], "max": [20], "identical_pairs": [3],
+                       "iso_median": [3.0], "iso_min": [1], "iso_max": [5], "iso_identical_pairs": [0]})
     cl = pd.DataFrame({"sample": ["M001", "M002", "GCF_000157895.3"], "kind": ["isolate", "isolate", "reference"], "species": ["kansasii"] * 3,
                        "cluster": ["MST Cluster 1", "singleton", "MST Cluster 1"]})
-    t = paper.species_table(qc, ds.reindex(columns=[*ds.columns]), cl)
+    t = paper.species_table(qc, ds, cl)
     k = t[t.species == "kansasii"].iloc[0]
-    assert k.isolates == 2 and k.references == 1 and k.clusters == 1 and k.singletons == 1 and k.good_targets_pct == "98.5 (98.0-99.0)"
+    assert k.isolates == 2 and k.references == 1 and k.clusters == 1 and k.singletons == 1  # M055 not counted
+    assert k.good_targets_pct == "98.5 (98.0-99.0)"
+    assert (k.distance_median, k.distance_min, k.distance_max, k.identical_pairs) == (3.0, 1, 5, 0)  # without the reference

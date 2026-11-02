@@ -45,6 +45,20 @@ def test_check_file(tmp_path: Path) -> None:
     f.write_text("Sample ID;Species\nM001;x\nGCF_1;y\nM009;z\n")
     assert check.check_file(tmp_path / "none.csv", "Sample ID", set(), False)[0] == "MISSING"
     assert check.check_file(f, "", set(), False)[0] == "UNCHECKED"
-    assert check.check_file(f, "Sample ID", {"M001", "M002"}, True)[0] == "INCOMPLETE"
-    assert check.check_file(f, "Sample ID", {"M001"}, True)[0] == "EXTRA"  # M009 is not in the cohort
-    assert check.check_file(f, "Sample ID", {"M001", "M009"}, True)[0] == "OK"
+    gcf = {"GCF_1"}
+    assert check.check_file(f, "Sample ID", {"M001", "M002"}, gcf)[0] == "INCOMPLETE"
+    assert check.check_file(f, "Sample ID", {"M001"}, gcf)[0] == "EXTRA"  # M009 is not in the cohort
+    assert check.check_file(f, "Sample ID", {"M001", "M009"}, gcf)[0] == "OK"
+
+
+def test_references_are_checked_individually(tmp_path: Path) -> None:
+    f = tmp_path / "t.csv"
+    f.write_text("Sample ID\nM001\nGCF_000157895.3\n")
+    # complex: all 7 references expected, one is not enough
+    status, detail = check.check_file(f, "Sample ID", {"M001"}, check.expected_refs(None))
+    assert status == "INCOMPLETE" and "GCF_002086675.1" in detail
+    # kansasii subset: only its own reference; a persicum reference is EXTRA
+    assert check.check_file(f, "Sample ID", {"M001"}, check.expected_refs(["kansasii"]))[0] == "OK"
+    f.write_text("Sample ID\nM001\nGCF_000157895.3\nGCF_002086675.1\n")
+    assert check.check_file(f, "Sample ID", {"M001"}, check.expected_refs(["kansasii"]))[0] == "EXTRA"
+    assert check.expected_refs(["attenuatum", "gastri"]) == {"GCF_900566085.1", "GCF_002102175.1"}

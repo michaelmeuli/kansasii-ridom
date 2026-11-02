@@ -2,7 +2,8 @@
 contaminated (the pool, 175 incl. M055 which is `excluded` for low chewBBACA coverage only; assemblies as real files named M001, the
 ATCC/DSM control strains by their LABEL) + the 7 public GTDB references (named by accession, unchanged: Ridom removes plasmids), and
 metadata.tsv for the isolate-data import. Same layout and metadata as the earlier kansasii-cgmlst/scripts/10_export_ridom.py,
-which left out M055."""
+which left out M055. One reference differs from that export: GCF_000157895.3 keeps its plasmid contig here (the old one
+used plasmid-free copies), the other 6 are byte-identical."""
 from __future__ import annotations
 
 import argparse

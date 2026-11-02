@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from common import REFERENCE_PREFIX, SUBSETS, load_cohort, read_meg
+from common import REFERENCES, SUBSETS, load_cohort, read_meg
 from kansasii_paths import IMM_DIR, OUT_RIDOM, SCREENING_MAP_RESULTS
 
 EXPECTED = Path(__file__).resolve().parents[1] / "config/expected_exports.tsv"
@@ -26,8 +26,13 @@ def expected_ids(cohort: pd.DataFrame, which: str, species: list[str] | None) ->
     return set(c.ridom_id)
 
 
-def check_file(path: Path, id_column: str, want: set[str], refs: bool) -> tuple[str, str]:
-    """Status and detail of one export."""
+def expected_refs(species: list[str] | None) -> set[str]:
+    """The GTDB references that a file of these species (None = the whole complex) must hold."""
+    return {acc for acc, sp in REFERENCES.items() if species is None or sp in species}
+
+
+def check_file(path: Path, id_column: str, want: set[str], refs: set[str]) -> tuple[str, str]:
+    """Status and detail of one export: `want` isolates and exactly the references `refs` (empty = none expected)."""
     if not path.exists():
         return "MISSING", ""
     if not id_column:
@@ -41,11 +46,8 @@ def check_file(path: Path, id_column: str, want: set[str], refs: bool) -> tuple[
         header = path.read_text(encoding="utf-8-sig").splitlines()[0]
         sep = ";" if header.count(";") > header.count(",") else ","
         ids = set(pd.read_csv(path, sep=sep, encoding="utf-8-sig", usecols=[id_column], dtype=str)[id_column].dropna())
-    have_refs = {i for i in ids if i.startswith(REFERENCE_PREFIX)}
-    missing = sorted(want - ids)
-    extra = sorted(ids - want - (have_refs if refs else set()))
-    if refs and not have_refs:
-        missing.append(f"{REFERENCE_PREFIX}* references")
+    missing = sorted((want | refs) - ids)
+    extra = sorted(ids - want - refs)
     n = f"{len(ids)} ids"
     if missing:
         return "INCOMPLETE", f"{n}; {len(missing)} missing: {', '.join(missing[:SHOWN])}{' ...' if len(missing) > SHOWN else ''}"
@@ -67,10 +69,10 @@ def main() -> int:
     rows = []
     for r in spec.to_dict("records"):
         subsets = list(SUBSETS) if r["subsets"] == "all" else [""]
-        refs = r["refs"] == "yes"
         for s in subsets:
             name = str(r["file"]).format(subset=s)
             want = expected_ids(cohort, str(r["cohort"]), SUBSETS.get(s))
+            refs = expected_refs(SUBSETS.get(s)) if r["refs"] == "yes" else set()
             status, detail = check_file(a.imm_dir / name, str(r["id_column"]), want, refs)
             rows.append({"no": r["no"], "file": name, "status": status, "detail": detail, "replaces": r["replaces"]})
     out = pd.DataFrame(rows)

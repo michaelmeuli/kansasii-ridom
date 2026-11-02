@@ -2,7 +2,8 @@
 
 Reads output/kansasii-ridom/results/ and writes there:
   paper_species_table.tsv  per species: isolates, references, good targets, genome size, allele distances within the species
-                           (median, range over isolate pairs of the species' subset), clusters
+                           (median, range over isolate pairs, references left out), clusters. M055 (sent to Ridom, but
+                           excluded from the distance analysis by Ridom) is not counted: the table covers the cohort only
   paper_numbers.md         the figures of the methods / results as sentences with their source file
 Run after 02-07 (submit_all.sbatch does).
 """
@@ -26,14 +27,15 @@ def species_table(qc: pd.DataFrame, dist_summary: pd.DataFrame, clusters: pd.Dat
     rows = []
     for sp in [s for s in DISTANCE_SUBSETS if s not in ("complex", "minor") and s in set(dist_summary.subset)]:
         g = qc[qc.species == sp]
-        iso = g[g.kind != "reference"]
+        iso = g[(g.kind != "reference") & (g.cohort == "keep")]
         d = dist_summary[dist_summary.subset == sp].iloc[0]
         c = clusters[(clusters.species == sp) & (clusters.kind != "reference")]
         rows.append({
             "species": sp, "isolates": len(iso), "references": int((g.kind == "reference").sum()),
             "good_targets_pct": fmt_range(iso.good_targets_pct.median(), iso.good_targets_pct.min(), iso.good_targets_pct.max()) if len(iso) else "",
             "genome_mbases": fmt_range(iso.genome_mbases.median(), iso.genome_mbases.min(), iso.genome_mbases.max()) if len(iso) else "",
-            "distance_median": d["median"], "distance_min": d["min"], "distance_max": d["max"], "identical_pairs": d.identical_pairs,
+            "distance_median": d["iso_median"], "distance_min": d["iso_min"], "distance_max": d["iso_max"],
+            "identical_pairs": d.iso_identical_pairs,
             "clustered_isolates": int((c.cluster != "singleton").sum()), "clusters": c[c.cluster != "singleton"].cluster.nunique(),
             "singletons": int((c.cluster == "singleton").sum()),
         })
