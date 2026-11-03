@@ -9,6 +9,8 @@
 no	file	id_column	cohort	refs	subsets	replaces
 1	ridom-comparison-table.csv	Sample ID	pool	yes	none	allele profiles: 04_qc (per-isolate QC, failed targets, locus stats), shared_loci_*.csv
 2	ridom-distance-matrix.meg	labels	keep	yes	none	allele distances: 02 (subsets), 05 (cluster threshold), 06 (MST nodes / edges, UPGMA trees), 07 (controls)
-4	ridom-mst-{subset}-mkan329.svg		keep	yes	all	MST figures drawn by SeqSphere+ (layout and colours are not reproducible in code)
+4a	ridom-mst-species.svg		keep	yes	none	MST figure drawn by SeqSphere+, whole complex, coloured by species (layout and colours are not reproducible in code; presence only, no script reads it)
+4b	ridom-mst-cluster.svg		keep	yes	none	MST figure drawn by SeqSphere+, whole complex, coloured by cluster (layout and colours are not reproducible in code; presence only, no script reads it)
+4c	ridom-mst-species-and-cluster.svg		keep	yes	none	MST figure drawn by SeqSphere+, whole complex, coloured by species and cluster (layout and colours are not reproducible in code; presence only, no script reads it)
 5	ridom-clusters.csv	Sample ID	keep	yes	none	Ridom's MST clusters: 05 (threshold, singletons, nearest neighbours)
 6	ridom-scheme.tasktemplate			no	none	scheme + Target Definer report: 03 (targets, filters, settings, parameters.txt)

@@ -25,7 +25,7 @@ sbatch submit_export.sbatch   # archives for Ridom (scripts/01, ~20 min) -> outp
 | `08_paper_numbers.py` | `paper_numbers.md` (methods / results figures with their source file) and `paper_species_table.tsv` |
 | `01_export_ridom.py` | `ridom_assemblies.{tar.gz,zip}` for SeqSphere+ (`ridom/assemblies/<name>.fasta`, `ridom/metadata.tsv`): the pool of 175 complex isolates incl. M055 (names `M001` ..., controls by `LABEL`) + the 7 GTDB references from `GTDB_REPRESENTATIVES` (`<acc>_query.fasta`, unchanged). Written to `.part` and renamed when complete |
 
-The MST figures (SVG / PNG) are a pure GUI export: `data/imm/ridom-mst-{species,cluster,species-and-cluster}.{svg,png}` (2026-11-02) are in, but not under the per-subset names of `config/expected_exports.tsv`, so `00_check_exports.py` still reports them MISSING. Everything else the paper needs is derived from the four table exports (`kansasii-docs/docs/RIDOM.md`). Failure reasons, new-allele flags and target coordinates are not in any export.
+The MST figures (SVG / PNG) are a pure GUI export: `data/imm/ridom-mst-{species,cluster,species-and-cluster}.{svg,png}` (2026-11-02) are whole-complex trees (coloured by species, by cluster, by both) and are what `config/expected_exports.tsv` lists (presence only; no script reads them). Everything else the paper needs is derived from the four table exports (`kansasii-docs/docs/RIDOM.md`). Failure reasons, new-allele flags and target coordinates are not in any export.
 
 ## Layout
 
