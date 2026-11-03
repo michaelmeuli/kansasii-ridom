@@ -3,7 +3,7 @@
 Reads the Ridom SeqSphere+ GUI exports (`data/imm/ridom-*`), the source of truth for cgMLST/MST/clusters. Only what is easy to get wrong:
 
 - Never edit a Ridom export and never write into `data/imm/`; derived tables go to `output/kansasii-ridom/results/`. New exports are recorded in the export log of `kansasii-docs/docs/RIDOM.md`.
-- Do not rebuild anything from `kansasii-mst` / `kansasii-cgmlst` (obsolete). Ridom's scheme (~1,400 `MKAN_RS*` loci) is not the chewBBACA scheme (3,646), so distances and clusters are not comparable.
+- Do not rebuild anything from `kansasii-mst` / `kansasii-cgmlst` (obsolete). Ridom's scheme (~1,400 `MKAN_RS*` loci) is not the chewBBACA scheme (3,647), so distances and clusters are not comparable.
 - Ridom exports are `;`-separated with a BOM-less header like `"Sample ID";"Species"`; `00` sniffs the separator. Ridom ids are `M081`, controls by `LABEL`, references `GCF_*` (`ridom_id` in `common.py`).
 - M055 is sent to Ridom (pool) but Ridom leaves it out of the distances and clusters, so the derived tables (species table, paper numbers) count only the `keep` cohort; M055 stays in `qc.tsv` as `pool_only`.
 - Cohort = `screening_map_results.csv` `excluded` (keep, 174) or the pool (175, adds M055). The `cohort` column of `config/expected_exports.tsv` must match what was sent to Ridom: `01_export_ridom.py` packs the pool (182 with the references), not `keep`.
