@@ -15,7 +15,7 @@ sbatch submit_export.sbatch   # archives for Ridom (scripts/01, ~20 min) -> outp
 
 | Script | Does |
 |---|---|
-| `00_check_exports.py` | compares `data/imm/ridom-*` with `config/expected_exports.tsv` (the 12 exports of RIDOM.md) and the isolates each must hold -> `export_status.tsv` (MISSING / INCOMPLETE / EXTRA / OK / UNCHECKED); `--strict` exits 1 unless all are fine |
+| `00_check_exports.py` | compares `data/imm/ridom-*` with `config/expected_exports.tsv` (the 5 exports of RIDOM.md) and the isolates each must hold -> `export_status.tsv` (MISSING / INCOMPLETE / EXTRA / OK / UNCHECKED); `--strict` exits 1 unless all are fine |
 | `02_distance_matrices.py` | `ridom-distance-matrix.meg` (SeqSphere+ MEGA, pairwise ignore) -> `distance_<subset>.tsv` for each subset of `DISTANCE_SUBSETS` (`SUBSETS` + one per minor species; submatrices of the complex one) + `distance_summary.tsv` |
 | `03_scheme.py` | `ridom-scheme.tasktemplate` (gzip XML) -> core targets, core / accessory / discarded classes, Target Definer filters, funnel, genomes, settings, `scheme_summary.tsv`, `scheme_parameters.txt`; checks the comparison-table loci = core targets |
 | `04_qc.py` | comparison table -> `qc.tsv` (good targets %, genome size, missing targets; consistency with Ridom's own columns), `qc_summary.tsv`, `locus_stats.tsv`, `target_failures.tsv` |
@@ -25,7 +25,7 @@ sbatch submit_export.sbatch   # archives for Ridom (scripts/01, ~20 min) -> outp
 | `08_paper_numbers.py` | `paper_numbers.md` (methods / results figures with their source file) and `paper_species_table.tsv` |
 | `01_export_ridom.py` | `ridom_assemblies.{tar.gz,zip}` for SeqSphere+ (`ridom/assemblies/<name>.fasta`, `ridom/metadata.tsv`): the pool of 175 complex isolates incl. M055 (names `M001` ..., controls by `LABEL`) + the 7 GTDB references from `GTDB_REPRESENTATIVES` (`<acc>_query.fasta`, unchanged). Written to `.part` and renamed when complete |
 
-Only the MST figures (SVG / PDF per subset) are still a pure GUI export; everything else the paper needs is derived from the four exports in hand (`kansasii-docs/docs/RIDOM.md`). Failure reasons, new-allele flags and target coordinates are not in any export.
+The MST figures (SVG / PNG) are a pure GUI export: `data/imm/ridom-mst-{species,cluster,species-and-cluster}.{svg,png}` (2026-11-02) are in, but not under the per-subset names of `config/expected_exports.tsv`, so `00_check_exports.py` still reports them MISSING. Everything else the paper needs is derived from the four table exports (`kansasii-docs/docs/RIDOM.md`). Failure reasons, new-allele flags and target coordinates are not in any export.
 
 ## Layout
 
