@@ -6,7 +6,7 @@ a pair does not depend on the other isolates, so a subset matrix is the submatri
 
 Writes to output/kansasii-ridom/results/: distance_<subset>.tsv (square, Sample ID in the first column, subsets of
 DISTANCE_SUBSETS in common.py: the complex, the MST subsets incl. the combined `minor`, and each minor species; references are in the subset of their species) and distance_summary.tsv (n, pairs, min / median /
-max distance and number of identical pairs per subset).
+max distance and number of identical pairs per subset, over all genomes, `iso_` without the GCF_* references, `study_` also without the controls).
 """
 from __future__ import annotations
 
@@ -36,10 +36,12 @@ def _stats(d: pd.DataFrame, prefix: str = "") -> dict[str, object]:
             f"{prefix}max": int(pairs.max()) if len(pairs) else "", f"{prefix}identical_pairs": int((pairs == 0).sum())}
 
 
-def summarize(name: str, d: pd.DataFrame) -> dict[str, object]:
-    """Distance statistics of a subset over all genomes, and (prefix `iso_`) over the isolates only, without the GCF_* references."""
+def summarize(name: str, d: pd.DataFrame, controls: frozenset[str] = frozenset()) -> dict[str, object]:
+    """Distance statistics of a subset over all genomes, over the isolates without the GCF_* references (prefix `iso_`), and over the study
+    isolates only, without references and without the control / type strains in `controls` (prefix `study_`)."""
     iso = [i for i in d.index if not i.startswith(REFERENCE_PREFIX)]
-    return {"subset": name, **_stats(d), **_stats(d.loc[iso, iso], "iso_")}
+    study = [i for i in iso if i not in controls]
+    return {"subset": name, **_stats(d), **_stats(d.loc[iso, iso], "iso_"), **_stats(d.loc[study, study], "study_")}
 
 
 def main() -> int:
@@ -53,6 +55,7 @@ def main() -> int:
     dist = read_meg(a.meg or a.imm_dir / "ridom-distance-matrix.meg")
     cohort = load_cohort(a.screening_map_results)
     species = species_of(cohort)
+    controls = frozenset(cohort.ridom_id[cohort.label.astype(bool)])  # strains with a LABEL (kind_of() == "control")
     unknown = [i for i in dist.index if i not in species]
     if unknown:
         print(f"ERROR: {len(unknown)} matrix labels not in the cohort or references: {', '.join(unknown[:8])}", file=sys.stderr)
@@ -62,7 +65,7 @@ def main() -> int:
     for name, wanted in DISTANCE_SUBSETS.items():
         d = subset_matrix(dist, species, wanted)
         d.rename_axis("Sample ID").to_csv(a.out / f"distance_{name}.tsv", sep="\t")
-        rows.append(summarize(name, d))
+        rows.append(summarize(name, d, controls))
     summary = pd.DataFrame(rows)
     summary.to_csv(a.out / "distance_summary.tsv", sep="\t", index=False)
     print(summary.to_string(index=False))

@@ -74,6 +74,8 @@ def test_subset_and_summary(tmp_path: Path) -> None:
     s = dm.summarize("kansasii", k)
     assert (s["n"], s["pairs"], s["min"], s["max"], s["identical_pairs"]) == (2, 1, 1, 1, 0)
     assert dm.summarize("pseudokansasii", dm.subset_matrix(d, sp, ["pseudokansasii"]))["pairs"] == 0
+    st = dm.summarize("complex", d, frozenset({"M003"}))  # study_ also drops the control strains
+    assert st["iso_n"] == 3 and st["study_n"] == 2 and st["study_pairs"] == 1
     full = dm.summarize("complex", d)  # isolates only: the GCF_* reference is left out of the iso_ columns
     assert full["n"] == 4 and full["iso_n"] == 3 and full["iso_pairs"] == 3
 
