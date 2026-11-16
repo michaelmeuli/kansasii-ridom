@@ -41,7 +41,7 @@ submit_all.sbatch   runs scripts/00 and 02-08 (log in output/kansasii-ridom/logs
 **Cohort:** `keep` = the complex species without `excluded` in `screening_map_results.csv` (174: the 3 complex control
 strains NR 128/132/133 are kept, named by `LABEL`); with the 7 public GTDB references (`GCF_*`) = 181, the set of Ridom's distances and clusters. Ridom ids: `Mkan329-081` is `M081`
 (`ridom_id()` in `common.py`, same rule as in `immensekansasii/scripts/06`). The archive for Ridom covers the whole `pool` (175 + 7 = 182), so it includes M055, which is
-excluded for low chewBBACA coverage only; Ridom gives its own good-target value for it.
+excluded for its low good-target value in Ridom only (79.4 %; `excluded` is computed from `data/imm/ridom-comparison-table.csv` by immensekansasii 06).
 
 Paths come from `scripts/kansasii_paths.py` (same names in every repo) and are flags of the scripts (`--imm-dir`, `--screening-map-results`,
 `--out`). Edit `kansasii-docs/templates/kansasii_paths.py`, not the copy (`bash repos/check_sync.sh --fix`).
