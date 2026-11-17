@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from kansasii_paths import COHORT_SPECIES, OUT_RIDOM, SCREENING_MAP_RESULTS
+from kansasii_paths import COHORT_SPECIES, GTDB_REPRESENTATIVE_GENOMES, OUT_RIDOM, SCREENING_MAP_RESULTS
 
 # one MST / distance matrix per subset; the minor species are exported together
 SUBSETS: dict[str, list[str] | None] = {
@@ -25,11 +25,7 @@ REFERENCE_PREFIX = "GCF_"  # the 7 public GTDB references are named by accession
 RIDOM_TARBALL = OUT_RIDOM / "ridom_assemblies.tar.gz"  # input of SeqSphere+ (01_export_ridom.py)
 RIDOM_ZIP = OUT_RIDOM / "ridom_assemblies.zip"
 # public GTDB representatives (accession, species) sent to Ridom as references; the first is the ATCC 12478 type strain
-REFERENCES = {
-    "GCF_000157895.3": "kansasii", "GCF_002086675.1": "persicum", "GCF_900566075.1": "pseudokansasii",
-    "GCF_900566085.1": "attenuatum", "GCF_900566055.1": "innocens", "GCF_002705925.1": "ostraviense",
-    "GCF_002102175.1": "gastri",
-}
+REFERENCES = GTDB_REPRESENTATIVE_GENOMES
 
 
 def ridom_id(pnr: str, label: str) -> str:
